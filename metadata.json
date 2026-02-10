@@ -1,0 +1,7 @@
+{
+  "name": "Helados Bon Rewards",
+  "description": "A vibrant loyalty and rewards application for Helados Bon fans, featuring flavor tracking, point systems, and custom ice cream creations.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
