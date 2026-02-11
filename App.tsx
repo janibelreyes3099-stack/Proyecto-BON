@@ -8,10 +8,11 @@ import {
    RotateCcw, History, Gift, HelpCircle, Play, Smartphone, MessageCircle, Edit3, Copy, Wallet, Users, Mail, PlusCircle, Search, Zap, CameraIcon, Save, Globe, Phone, MapPinIcon, ChevronRight
 } from 'lucide-react';
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { UserPersona, UserProfile, Stamp, Finalist, FeatureSet, TriviaCategory, TriviaQuestion, TriviaHistoryItem } from './types';
+import { UserPersona, UserProfile, Stamp, Finalist, FeatureSet, TriviaCategory, TriviaQuestion, TriviaHistoryItem, CartItem } from './types';
 import { STAMPS, NEIGHBORHOODS, FINALISTS, TRIVIA_CATEGORIES, TRIVIA_QUESTIONS, TRIVIA_HISTORY, FAMILY_MEMBERS, FAMILY_GOAL, FAMILY_CONTRIBUTIONS, LAB_OPTIONS } from './constants';
 import { PromosView } from './Promos';
 import { MenuView } from './Menu';
+import { CartView } from './Cart';
 
 // --- Context ---
 interface AppState {
@@ -25,11 +26,15 @@ interface AppState {
    login: (email?: string, password?: string) => void;
    logout: () => void;
    register: (user: UserProfile) => void;
+   cart: CartItem[];
+   addToCart: (item: CartItem) => void;
+   removeFromCart: (itemId: string) => void;
+   clearCart: () => void;
 }
 
 const AppContext = createContext<AppState | undefined>(undefined);
 
-const useApp = () => {
+export const useApp = () => {
    const context = useContext(AppContext);
    if (!context) throw new Error('useApp must be used within AppProvider');
    return context;
@@ -1837,15 +1842,38 @@ const App: React.FC = () => {
       localStorage.setItem('current_user', JSON.stringify(user));
       setIsAuthenticated(true);
       localStorage.setItem('is_authenticated', 'true');
+
+   };
+
+   // --- Cart Logic ---
+   const [cart, setCart] = useState<CartItem[]>([]);
+
+   const addToCart = (item: CartItem) => {
+      setCart(prev => {
+         const existing = prev.find(i => i.id === item.id);
+         if (existing) {
+            return prev.map(i => i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i);
+         }
+         return [...prev, { ...item, quantity: 1 }];
+      });
+   };
+
+   const removeFromCart = (itemId: string) => {
+      setCart(prev => prev.filter(i => i.id !== itemId));
+   };
+
+   const clearCart = () => {
+      setCart([]);
    };
 
    return (
-      <AppContext.Provider value={{ profile, setProfile, stamps, currentDay: 4, activeFeature, setActiveFeature, isAuthenticated, login, logout, register }}>
+      <AppContext.Provider value={{ profile, setProfile, stamps, currentDay: 4, activeFeature, setActiveFeature, isAuthenticated, login, logout, register, cart, addToCart, removeFromCart, clearCart }}>
          <HashRouter>
             <div className="max-w-md mx-auto bg-white min-h-screen shadow-2xl overflow-hidden relative font-sans">
                <Routes>
                   <Route path="/login" element={<LoginView />} />
                   <Route path="/register" element={<RegisterView />} />
+                  <Route path="/cart" element={<RequireAuth><CartView /></RequireAuth>} />
 
                   {/* Explorador Routes */}
                   <Route path="/" element={<RequireAuth><ExploradorDashboard /></RequireAuth>} />
@@ -1879,11 +1907,6 @@ const App: React.FC = () => {
                   <Route path="/profile" element={<RequireAuth><ProfileView /></RequireAuth>} />
                   <Route path="/redeem" element={<RequireAuth><RedeemPointsView /></RequireAuth>} />
                   <Route path="/promos" element={<RequireAuth><PromosView coupons={profile.coupons} /></RequireAuth>} />
-
-                  {/* Profile Routes */}
-                  <Route path="/profile" element={<ProfileView />} />
-                  <Route path="/redeem" element={<RedeemPointsView />} />
-                  <Route path="/promos" element={<PromosView />} />
                </Routes>
                <BottomNav />
             </div>

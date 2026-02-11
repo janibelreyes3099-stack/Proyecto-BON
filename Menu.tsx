@@ -3,15 +3,30 @@ import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, ShoppingCart, Plus, Minus, Search, Filter } from 'lucide-react'; // Assuming lucide-react is used based on App.tsx
 import { MENU_CATEGORIES, MENU_ITEMS } from './constants';
 
+import { useApp } from './App';
+import { CartItem } from './types';
+
 export const MenuView: React.FC = () => {
     const navigate = useNavigate();
+    const { addToCart, cart } = useApp();
     const [activeCategory, setActiveCategory] = useState(MENU_CATEGORIES[0].id);
-    const [cartCount, setCartCount] = useState(0); // Simple local state for demo
+
+    const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+    const cartTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
     const filteredItems = MENU_ITEMS.filter(item => item.category === activeCategory);
 
-    const addToCart = () => {
-        setCartCount(prev => prev + 1);
+    const handleAddToCart = (item: typeof MENU_ITEMS[0]) => {
+        const cartItem: CartItem = {
+            id: `${item.id}-${Date.now()}`, // simple unique id
+            menuItemId: item.id,
+            name: item.name,
+            price: item.price,
+            quantity: 1,
+            image: item.image,
+            category: item.category
+        };
+        addToCart(cartItem);
     };
 
     return (
@@ -91,7 +106,7 @@ export const MenuView: React.FC = () => {
                             <div className="flex items-center justify-between mt-3">
                                 <p className="text-lg font-black text-red-600 italic">RD${item.price}</p>
                                 <button
-                                    onClick={addToCart}
+                                    onClick={() => handleAddToCart(item)}
                                     className="w-8 h-8 bg-yellow-400 text-black rounded-full flex items-center justify-center shadow-lg hover:scale-110 active:scale-90 transition-all font-bold"
                                 >
                                     <Plus size={16} />
@@ -105,12 +120,15 @@ export const MenuView: React.FC = () => {
             {/* Bottom Action (Checkout Teaser) */}
             {cartCount > 0 && (
                 <div className="fixed bottom-24 left-6 right-6 z-30 animate-in slide-in-from-bottom duration-300">
-                    <button className="w-full bg-gray-900 text-white py-4 rounded-3xl font-black uppercase italic shadow-2xl flex items-center justify-between px-8">
+                    <button
+                        onClick={() => navigate('/cart')}
+                        className="w-full bg-gray-900 text-white py-4 rounded-3xl font-black uppercase italic shadow-2xl flex items-center justify-between px-8"
+                    >
                         <span className="flex items-center gap-2">
                             <span className="bg-yellow-400 text-black w-6 h-6 rounded-full flex items-center justify-center text-xs">{cartCount}</span>
                             Ver Carrito
                         </span>
-                        <span>RD${cartCount * 150} approx</span> {/* Mock total */}
+                        <span>RD${cartTotal.toFixed(2)}</span>
                     </button>
                 </div>
             )}

@@ -148,3 +148,13 @@ export interface Coupon {
   isWelcome?: boolean;
 }
 
+export interface CartItem {
+  id: string; // unique (e.g. timestamp or random)
+  menuItemId: string;
+  name: string;
+  price: number;
+  quantity: number;
+  image?: string;
+  category: string;
+}
+

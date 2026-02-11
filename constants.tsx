@@ -197,11 +197,29 @@ export const MENU_ITEMS = [
   },
   {
     id: 'item6',
-    name: 'Pinta Familiar',
+    name: '1 Pinta',
     description: 'Lleva tu sabor favorito a casa (16oz).',
-    price: 600,
+    price: 300,
     category: 'cat_pintas',
-    image: '/pinta.png',
+    image: '/1 pinta.png',
     calories: 1200
+  },
+  {
+    id: 'item_2pintas',
+    name: '2 Pintas',
+    description: 'Doble sabor para compartir (2x16oz).',
+    price: 500,
+    category: 'cat_pintas',
+    image: '/2 pintas.png',
+    calories: 2400
+  },
+  {
+    id: 'item_mediogalon',
+    name: '1/2 Galón',
+    description: 'El tamaño perfecto para compartir (32oz).',
+    price: 800,
+    category: 'cat_pintas',
+    image: '/1 2 galon.png',
+    calories: 4800
   }
 ];
